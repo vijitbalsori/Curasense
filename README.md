@@ -282,3 +282,8 @@ The following things can be improve:
 * Flutter UI experience
 
 ---
+# 👥 **Contributors**
+
+- Kanak Nagar
+- Vijit Balsori
+---
