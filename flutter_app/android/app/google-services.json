@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "408067812148",
+    "project_id": "medassistant-87b06",
+    "storage_bucket": "medassistant-87b06.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:408067812148:android:9901208d1a3cb678685361",
+        "android_client_info": {
+          "package_name": "com.example.flutter_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "408067812148-uof67namvs8706neg6khu5pctc772v2s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAl8YdZEMg64sU7zIz_2fBaxf5mOlC0GFE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "408067812148-uof67namvs8706neg6khu5pctc772v2s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
