@@ -17,7 +17,7 @@ __pycache__/
 env/
 *.env
 backend/__pycache__/
-backend/data/
+# backend/data/
 backend/reports/
 backend/qdrant_local/
 
