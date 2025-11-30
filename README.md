@@ -6,14 +6,12 @@ CuraSense is an AI-powered healthcare assistant that processes medical documents
 
 ## 🌟 **Features**
 
-* 📄 PDF / document ingestion into a structured knowledge base
-* 🔍 Semantic search & retrieval using embedding-based vector search
+* 📂 XLSX/CSV → Embeddings → Qdrant ingestion pipeline
+* 🔍 Semantic search using vector embeddings (BGE-small)
 * 🧠 LLM response generation with custom prompt templates
 * 📚 Local Knowledge Base (KB) for offline or private use
-* ⚙️ Modular RAG pipeline architecture
-* 📥 Data downloader script (for large datasets not stored in Git)
+* ⚙️ Fully modular RAG pipeline
 * 📱 Flutter frontend for user interaction
-* 🧩 Clear backend–frontend separation
 
 ---
 
@@ -23,22 +21,44 @@ CuraSense is an AI-powered healthcare assistant that processes medical documents
 CuraSense/
 │
 ├── backend/
-│   ├── embedding.py        # Embedding generation logic
-│   ├── retriever.py        # Vector store / retrieval logic
-│   ├── prompt_builder.py   # Prompt templates for LLM
-│   ├── generator.py        # LLM response generator
-│   ├── pipeline.py         # Full RAG pipeline orchestration
-│   ├── ingest_kb.py        # Converts PDFs → embeddings → KB
-│   ├── pdf_reader.py       # PDF reading / text extraction
-│   ├── logger.py           # Logging utilities
-│   └── data/               # Ignored — populated via downloader
+|   ├──src/
+|   │   ├── generator.py        # LLM response generator
+|   │   ├── pipeline.py         # Full RAG pipeline orchestration
+|   │   ├── prompt_builder.py   # Prompt templates for LLM
+|   │   └── retriever.py        # Vector store / retrieval logic
+|   ├──utils/
+|   │   ├── embedding.py        # Embedding generation logic
+|   │   ├── ingest_kb.py        # Converts PDFs → embeddings → KB
+|   │   ├── logger.py           # Logging utilities
+|   │   └── pdf_reader.py       # PDF reading / text extraction
+│   ├── data/               # Ignored — populated via downloader
+|   ├──auth.py
+|   └──main.py
 │
 ├── flutter_app/            # Flutter mobile application
+|   ├──assets/
+|   |  └──google_logo.jpeg
+|   |
+|   └──lib/
+|      ├──providers/
+|      |  └── auth_provider.dart       
+|      ├──screens/
+|      |  ├── chat_screen.dart
+|      |  ├── home_screen.dart
+|      |  ├── login_screen.dart
+|      |  └── upload_screen.dart
+|      ├──services/
+|      |  ├── api_service.dart
+|      |  └── auth_screen.dart
+|      ├──widgets/
+|      |  ├── option_card.dart
+|      |  └── result_card.dart
+|      └── main.dart     
 │
 ├── models/                 # Large LLM/embedding models (ignored)
 │
 ├── scripts/
-│   ├── download_data.py    # Downloads MID.xlsx from Google Sheets
+│   └── download_data.py    # Downloads MID.xlsx from Google Sheets
 │
 ├── .gitignore
 └── README.md
@@ -51,7 +71,7 @@ CuraSense/
 ## **1. Create and activate virtual environment**
 
 ```bash
-you@pc:~$ cd backend
+cd backend
 python -m venv .venv
 source .venv/bin/activate         # Mac/Linux
 .\.venv\Scripts\activate          # Windows
@@ -82,32 +102,78 @@ backend/data/MID.xlsx
 ```
 
 ---
+## **4. Download the LLM model (HuggingFace → models/)**
 
-# 📚 **Ingesting the Knowledge Base**
+To run the local LLM, download a quantized model (`.gguf`) from **HuggingFace** and place it inside the `models/` folder.
 
-To build the vector database from PDFs:
+### 📥 Recommended Model
 
-Place PDFs in:
+**Phi-3-mini-4k-instruct-q4.gguf**
+A lightweight and efficient model suitable for local inference.
+
+### 🔗 HuggingFace link
 
 ```
-backend/kb_documents/
+https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf
 ```
+
+### 📌 Steps to Add the Model
+
+1. Create the `models/` folder (if it doesn't exist):
+
+   ```bash
+   mkdir models
+   ```
+
+2. Download the `.gguf` file from HuggingFace (example):
+
+   ```bash
+   Phi-3-mini-4k-instruct-q4.gguf
+   ```
+
+3. Place the file inside:
+
+   ```
+   CuraSense/models/
+   ```
+
+Your folder should look like:
+
+```
+CuraSense/
+   ├── models/
+   │    └── Phi-3-mini-4k-instruct-q4.gguf
+```
+
+## ⚠️ Important Notes
+
+* Your backend should reference the model path, e.g.:
+
+```python
+MODEL_PATH = "models/Phi-3-mini-4k-instruct-q4.gguf"
+```
+
+##  **5. Ingesting the Knowledge Base**
+
+To build the vector database from data:
 
 Run ingestion:
 
 ```bash
-python backend/ingest_kb.py
+python backend/utils/ingest_kb.py
+
 ```
 
-This will:
+this will:
 
-* extract text from PDFs
-* chunk + embed content
-* store vectors in KB
+- reads data from backend/data/
+- extracts useful fields
+- chunks rows/text
+- embeds using BGE-small
+- upserts to Qdrant collection (medical_kb)
 
 ---
-
-# 🧠 **Running the Backend (RAG Pipeline Test)**
+## **6. RAG Pipeline Test**
 
 Test the entire RAG pipeline using:
 
@@ -115,21 +181,81 @@ Test the entire RAG pipeline using:
 python backend/pipeline.py
 ```
 
-Or directly test LLM generation:
-
-```bash
-python backend/generator.py
-```
-
-These components use:
-
-* **prompt_builder.py** – builds structured prompts
-* **retriever.py** – retrieves embeddings
-* **generator.py** – creates LLM responses
-
 ---
 
-# 📱 **Running the Flutter App**
+# ⚙️ **Flutter Setup**
+
+Follow these steps to setup the Flutter app after cloning the repository:
+
+## 1️⃣ Clone the repository
+
+```bash
+git clone https://github.com/vijitbalsori/Curasense.git
+cd Curasense/flutter_app
+```
+
+## 2️⃣ Ensure Flutter is installed
+
+```bash
+flutter doctor
+```
+
+Fix any issues it reports.
+
+## 3️⃣ Install Flutter dependencies
+
+```bash
+flutter pub get
+```
+
+## 4️⃣ Configure the backend API endpoint
+
+Edit:
+
+```
+flutter_app/lib/services/api_service.dart
+```
+
+Set the correct BASE_URL:
+
+### Android Emulator
+
+```dart
+const String BASE_URL = 'http://10.0.2.2:8000';
+```
+
+### iOS Simulator / Web
+
+```dart
+const String BASE_URL = 'http://localhost:8000';
+```
+
+### Physical device (same WiFi)
+
+```dart
+const String BASE_URL = 'http://<YOUR-IP>:8000';
+```
+
+## 5️⃣ Optional: Build APK
+
+```bash
+flutter build apk --release
+```
+
+---
+# 📱 **Running the CuraSense App**
+
+##  1️⃣ Start the backend
+
+In a terminal:
+
+```bash
+uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+## 2️⃣ Run the Flutter app
+
+In a second terminal:
 
 From project root:
 
@@ -139,38 +265,16 @@ flutter pub get
 flutter run
 ```
 
-Ensure backend is running if your UI interacts with it over HTTP.
+Choose a connected device/emulator.
+
 
 ---
 
-# 🛑 **Large Files Handling**
 
-Your `.gitignore` correctly excludes:
 
-* `models/`
-* `backend/data/`
-* `.venv/`
-* build folders
+# 🤝 **Future Improvements**
 
-This prevents the GitHub 100 MB push error.
-
----
-
-# 📤 **Deploying / Pushing to GitHub**
-
-After editing README or adding scripts:
-
-```bash
-git add .
-git commit -m "Update README and scripts"
-git push
-```
-
----
-
-# 🤝 **Contributing**
-
-You are welcome to improve:
+The following things can be improve:
 
 * Retrieval quality
 * Prompt templates
@@ -178,7 +282,3 @@ You are welcome to improve:
 * Flutter UI experience
 
 ---
-
-# 📄 **License**
-
-Add a license here (MIT recommended).
